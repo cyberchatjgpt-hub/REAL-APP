@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CampusLink</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0c0c0e">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{box-sizing:border-box;color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#0c0c0e;--card:#16161a;--line:#26262c;--text:#f2efe6;--mut:#8d8a80;--gold:#d4af37;--blue:#22d3ff;--ong:#1a1400;--brush:linear-gradient(135deg,#f5e3a1,#d4af37 45%,#8a6d1c)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,"Noto Sans Ethiopic","Segoe UI",sans-serif;min-height:100vh}
+#app{max-width:480px;margin:0 auto;padding:14px 14px 92px}
+h1{font-size:24px;margin:0;background:var(--brush);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:16px;margin:0 0 8px;color:var(--gold)}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 4px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);text-align:start;color:inherit;font:inherit;cursor:pointer}
+.row:last-child{border-bottom:0}
+.g{flex:1;min-width:0}.g b{display:block}
+.mut{color:var(--mut);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.av{width:44px;height:44px;border-radius:50%;background:#1f1f26;border:1px solid var(--line);display:grid;place-items:center;font-size:22px;flex:none}
+.btn{border:0;border-radius:12px;padding:12px 16px;font:inherit;font-weight:700;background:var(--brush);color:var(--ong);min-height:46px;cursor:pointer}
+.btn.blue{background:var(--blue);color:#001a22}
+.btn.ghost{background:#202027;color:var(--text);border:1px solid var(--line)}
+.btn.sm{padding:8px 12px;min-height:38px;font-size:14px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.msgs{display:flex;flex-direction:column;gap:8px;min-height:50vh;max-height:62vh;overflow-y:auto;padding:2px}
+.m{max-width:85%;background:#1f1f26;border-radius:14px;padding:9px 12px;align-self:flex-start;font-size:15px}
+.m.me{align-self:flex-end;background:#0b3b47;border:1px solid var(--blue)}
+.m b{display:block;font-size:12px;color:var(--gold)}
+.m.bot{border:1px solid var(--gold)}
+.media{margin-top:4px;border-radius:10px;padding:26px 12px;background:#2a2a33;text-align:center;font-size:13px;color:var(--mut)}
+.opt{display:block;width:100%;margin-top:6px;text-align:start}
+.send{display:flex;gap:8px;margin-top:10px}
+input[type=text],input[type=number],input[type=email],input[type=password]{flex:1;min-width:0;background:#101013;border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);font:inherit}
+.clk{font-size:64px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;color:var(--blue);margin:6px 0}
+.center{text-align:center}
+.price{color:var(--gold);font-weight:800}
+.pill{display:inline-block;border:1px solid var(--blue);color:var(--blue);border-radius:99px;padding:2px 10px;font-size:13px}
+.lite-note{border:1px dashed var(--gold);color:var(--gold);border-radius:12px;padding:8px 12px;margin-bottom:12px;font-size:14px}
+.bd{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:12px;padding:6px 10px;margin:0 6px 6px 0;opacity:.4}
+.bd.on{opacity:1;border-color:var(--gold)}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:#101013;border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+.tabs div{display:flex;max-width:480px;margin:0 auto}
+.tab{flex:1;border:0;background:none;color:var(--mut);padding:6px 2px;font:inherit;font-size:12px;font-weight:700;border-radius:12px;cursor:pointer}
+.tab span{display:block;font-size:21px}
+.tab.on{color:var(--gold)}
+#toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-160%);background:var(--gold);color:var(--ong);padding:9px 16px;border-radius:99px;font-weight:700;z-index:9;transition:transform .25s}
+#toast.show{transform:translate(-50%,0)}
+body.lite .av,body.lite .tab span{display:none}
+body.lite h1{background:none;color:var(--gold)}
+body.lite .btn{background:var(--gold)}
+body.lite *{animation:none!important;transition:none!important}
+</style>
+</head>
+<body>
+<div id="app"><div id="view"></div></div>
+<nav class="tabs"><div id="tabs"></div></nav>
+<div id="toast" role="status"></div>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const L={
+en:{chats:'Chats',pods:'Pods',market:'Market',ranks:'Ranks',settings:'Settings',language:'Language',lite:'Low-data mode (text only)',liteOn:'Low-data mode is on: media hidden',send:'Send',msg:'Message',hint:'Type /quiz for a question',ok:'Correct! +10 points',no:'Not quite. Answer: ',focus:'Focus',rest:'Break',studying:'studying now',join:'Join pod',leave:'Leave pod',synced:'Everyone sees the same clock',escrow:'Buy with escrow',held:'Money held',confirm:'I got it, release money',released:'Released to seller',sell:'Sell an item',item:'Item',price:'Price (ETB)',post:'Post',badges:'Badges',pts:'pts',b1:'First correct answer',b2:'Joined a pod',b3:'50 points',photo:'Photo hidden to save data',back:'Back'},
+am:{chats:'ቻቶች',pods:'ቡድኖች',market:'ገበያ',ranks:'ደረጃ',settings:'ቅንብሮች',language:'ቋንቋ',lite:'ዝቅተኛ ዳታ ሁነታ (ጽሑፍ ብቻ)',liteOn:'ዝቅተኛ ዳታ ሁነታ በርቷል',send:'ላክ',msg:'መልእክት',hint:'ጥያቄ ለማግኘት /quiz ይጻፉ',ok:'ትክክል! +10 ነጥብ',no:'ትክክል አይደለም። መልሱ፦ ',focus:'ትኩረት',rest:'እረፍት',studying:'አሁን እያጠኑ ነው',join:'ተቀላቀል',leave:'ውጣ',synced:'ሁሉም ተመሳሳይ ሰዓት ያያሉ',escrow:'በኤስክሮ ግዛ',held:'ገንዘብ ተይዟል',confirm:'ተቀብያለሁ፣ ገንዘቡ ይለቀቅ',released:'ለሻጭ ተለቋል',sell:'ዕቃ ሽጥ',item:'ዕቃ',price:'ዋጋ (ብር)',post:'አውጣ',badges:'ባጆች',pts:'ነጥብ',b1:'የመጀመሪያ ትክክለኛ መልስ',b2:'ቡድን ተቀላቅሏል',b3:'50 ነጥብ',photo:'ዳታ ለመቆጠብ ፎቶ ተደብቋል',back:'ተመለስ'},
+om:{chats:'Haasaa',pods:'Gareewwan',market:'Gabaa',ranks:'Sadarkaa',settings:'Qindaa’ina',language:'Afaan',lite:'Haala daataa xiqqaa (barreeffama qofa)',liteOn:'Haalli daataa xiqqaa banameera',send:'Ergi',msg:'Ergaa',hint:'Gaaffii argachuuf /quiz barreessi',ok:'Sirrii! +10 qabxii',no:'Sirrii miti. Deebiin: ',focus:'Xiyyeeffannaa',rest:'Boqonnaa',studying:'amma qo’achaa jiru',join:'Makami',leave:'Ba’i',synced:'Hundi sa’aatii tokko ilaalu',escrow:'Escrow’n bitadhu',held:'Maallaqni qabameera',confirm:'Argadheera, maallaqni gadhiifamu',released:'Gurguraatti gadhiifameera',sell:'Meeshaa gurgur',item:'Meeshaa',price:'Gatii (Birrii)',post:'Maxxansi',badges:'Mallattoo',pts:'qabxii',b1:'Deebii sirrii jalqabaa',b2:'Gareetti makameera',b3:'Qabxii 50',photo:'Daataa qusachuuf suuraan dhokateera',back:'Duubatti'}};
+const QS=[{q:'Solve: 2x + 6 = 14',o:['x = 3','x = 4','x = 5','x = 6'],a:1},{q:'SI unit of force?',o:['Joule','Watt','Newton','Pascal'],a:2},{q:'Atomic number of oxygen?',o:['6','7','8','9'],a:2},{q:'Powerhouse of the cell?',o:['Nucleus','Ribosome','Mitochondria','Golgi body'],a:2}];
+Object.assign(L.en,{email:'Email',pass:'Password (6+ characters)',user:'Username',login:'Log in',signup:'Sign up',logout:'Log out',newroom:'New room name',create:'Create',empty:'No messages yet. Say hi!',check:'Check your email to confirm, then log in'});
+Object.assign(L.am,{email:'ኢሜይል',pass:'የይለፍ ቃል (6+ ቁምፊ)',user:'የተጠቃሚ ስም',login:'ግባ',signup:'ተመዝገብ',logout:'ውጣ',newroom:'አዲስ ክፍል ስም',create:'ፍጠር',empty:'መልእክት የለም። ሰላም ይበሉ!',check:'ኢሜይልዎን ያረጋግጡ፣ ከዚያ ይግቡ'});
+Object.assign(L.om,{email:'Imeelii',pass:'Jecha darbii (6+)',user:'Maqaa fayyadamaa',login:'Seeni',signup:'Galmaa’i',logout:'Ba’i',newroom:'Maqaa kutaa haaraa',create:'Uumi',empty:'Ergaan hin jiru. Nagaa jedhi!',check:'Imeelii kee mirkaneessi, achiin seeni'});
+const KEY='campuslink-v2';
+let S={lang:'en',lite:false,joined:false,done:{}};
+try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const t=k=>(L[S.lang]&&L[S.lang][k])||L.en[k];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove('show'),2600)}
+function ph(){const x=Math.floor(Date.now()/1000)%1800;return x<1500?{f:1,left:1500-x}:{f:0,left:1800-x}}
+const ok=window.CFG&&CFG.url&&!CFG.url.startsWith('PASTE')&&window.supabase;
+const sb=ok?supabase.createClient(CFG.url,CFG.key):null;
+let U=null,P={points:0,username:''},tab='chats',room=null,msgs=[],ch=null,rooms=[],board=[],items=[],lastF=null;
+const $=id=>document.getElementById(id);
+const pts=n=>{P.points+=n;sb.from('profiles').update({points:P.points}).eq('id',U.id).then(()=>{})};
+
+async function setUser(u){
+ U=u||null;
+ if(U){const un=(U.user_metadata&&U.user_metadata.username)||U.email.split('@')[0];
+  await sb.from('profiles').upsert({id:U.id,username:un});
+  const r=await sb.from('profiles').select('*').eq('id',U.id).single();if(r.data)P=r.data;
+  const q=await sb.from('rooms').select('*').order('id');rooms=q.data||[]}
+ render()}
+async function openRoom(id){
+ room=rooms.find(r=>r.id==id);msgs=[];if(ch){sb.removeChannel(ch);ch=null}
+ render();
+ const r=await sb.from('messages').select('*').eq('room_id',id).order('created_at',{ascending:false}).limit(40);
+ msgs=(r.data||[]).reverse();paint();
+ ch=sb.channel('room-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+id},p=>addMsg(p.new)).subscribe();
+}
+function addMsg(m){if(msgs.some(x=>x.id===m.id))return;msgs.push(m);paint()}
+function paint(){const e=$('msgs');if(e){e.innerHTML=msgsHtml();e.scrollTop=e.scrollHeight}}
+function msgsHtml(){
+ if(!msgs.length)return `<div class="mut">${t('empty')}</div>`;
+ return msgs.map(m=>{
+  if(m.body.startsWith('❓QUIZ|')){const i=+m.body.split('|')[1],q=QS[i]||QS[0],d=S.done[m.id];
+   return `<div class="m bot"><b>QuizBot · ${esc(m.username)}</b>${esc(q.q)}${d===undefined?q.o.map((o,j)=>`<button class="btn ghost sm opt" data-a="ans" data-id="${m.id}" data-i="${i}" data-j="${j}">${esc(o)}</button>`).join(''):`<div>${d?'✅ '+t('ok'):'❌ '+t('no')+esc(q.o[q.a])}</div>`}</div>`}
+  return `<div class="m ${m.user_id===U.id?'me':''}"><b>${esc(m.username||'?')}</b>${esc(m.body)}</div>`}).join('')}
+
+function auth(){return `<div class="top"><h1>CampusLink</h1></div><div class="card f" style="display:flex;flex-direction:column;gap:8px">
+ <input type="email" id="em" placeholder="${t('email')}" autocomplete="email"><input type="password" id="pw" placeholder="${t('pass')}" autocomplete="current-password"><input type="text" id="un" maxlength="20" placeholder="${t('user')}">
+ <button class="btn" data-a="login">${t('login')}</button><button class="btn ghost" data-a="signup">${t('signup')}</button></div>
+ <div class="card">${['en','am','om'].map(l=>`<button class="btn ${S.lang===l?'':'ghost'} sm" data-a="lang" data-v="${l}" style="margin:0 6px 0 0">${{en:'English',am:'አማርኛ',om:'Oromoo'}[l]}</button>`).join('')}</div>`}
+function chats(){
+ if(room)return `<div class="top"><button class="btn ghost sm" data-a="back">← ${t('back')}</button><h1>${esc(room.name)}</h1><span></span></div>
+ <div class="card"><div class="msgs" id="msgs">${msgsHtml()}</div><div class="mut" style="margin-top:8px;white-space:normal">${t('hint')}</div>
+ <div class="send"><input type="text" id="txt" maxlength="500" placeholder="${t('msg')}"><button class="btn" data-a="send">${t('send')}</button></div></div>`;
+ return `<div class="top"><h1>CampusLink</h1><button class="btn ghost sm" data-a="go" data-v="set" aria-label="${t('settings')}">⚙️</button></div>
+ ${S.lite?`<div class="lite-note">${t('liteOn')}</div>`:''}
+ <div class="card">${rooms.map(r=>`<button class="row" data-a="open" data-id="${r.id}"><div class="av">💬</div><div class="g"><b>${esc(r.name)}</b></div></button>`).join('')}</div>
+ <div class="card"><div class="send"><input type="text" id="rn" maxlength="30" placeholder="${t('newroom')}"><button class="btn" data-a="mkroom">${t('create')}</button></div></div>`}
+function pods(){const p=ph();return `<div class="top"><h1>${t('pods')}</h1><span class="pill">⭐ ${P.points}</span></div>
+ <div class="card center"><div class="pill" id="phl">${p.f?t('focus'):t('rest')}</div><div class="clk" id="clk">${fmt(p.left)}</div>
+ <div class="mut" style="white-space:normal">${t('synced')}</div><br><button class="btn ${S.joined?'ghost':''}" data-a="join">${S.joined?t('leave'):t('join')}</button></div>`}
+function ranks(){return `<div class="top"><h1>${t('ranks')}</h1><span class="pill">⭐ ${P.points}</span></div>
+ <div class="card">${board.map((r,i)=>`<div class="row" style="cursor:default"><b style="width:28px">${['🥇','🥈','🥉'][i]||i+1}</b><div class="g"><b>${esc(r.username)}</b></div><span class="price">${r.points} ${t('pts')}</span></div>`).join('')}</div>`}
+function market(){return `<div class="top"><h1>${t('market')}</h1></div>
+ <div class="card">${items.map(i=>`<div class="row" style="cursor:default"><div class="g"><b>${esc(i.title)}</b><div class="mut">${esc(i.seller)} · <span class="price">${i.price} ETB</span></div></div>${i.user_id===U.id?`<button class="btn ghost sm" data-a="del" data-id="${i.id}">✕</button>`:''}</div>`).join('')}</div>
+ <div class="card"><h2>${t('sell')}</h2><div class="send"><input type="text" id="it" maxlength="40" placeholder="${t('item')}"></div>
+ <div class="send"><input type="number" id="pr" min="1" placeholder="${t('price')}"><button class="btn" data-a="sell">${t('post')}</button></div></div>`}
+function set(){return `<div class="top"><button class="btn ghost sm" data-a="go" data-v="chats">← ${t('back')}</button><h1>${t('settings')}</h1><span></span></div>
+ <div class="card"><b>${esc(P.username)}</b><div class="mut">${esc(U.email)}</div></div>
+ <div class="card"><h2>${t('language')}</h2>${['en','am','om'].map(l=>`<button class="btn ${S.lang===l?'':'ghost'} sm" data-a="lang" data-v="${l}" style="margin:0 6px 6px 0">${{en:'English',am:'አማርኛ',om:'Afaan Oromoo'}[l]}</button>`).join('')}</div>
+ <div class="card"><label class="row" style="cursor:pointer"><input type="checkbox" id="lite" ${S.lite?'checked':''} style="width:22px;height:22px"><span class="g">${t('lite')}</span></label></div>
+ <button class="btn ghost" style="width:100%" data-a="logout">${t('logout')}</button>`}
+const V={chats,pods,market,ranks,set};
+const TB=[['chats','💬'],['pods','⏱️'],['market','🛒'],['ranks','🏆']];
+function render(){
+ document.body.classList.toggle('lite',S.lite);document.documentElement.lang=S.lang;
+ $('view').innerHTML=!sb?`<div class="card"><h2>Setup needed</h2>Add your Supabase URL and key to <b>config.js</b>, then reload.</div>`:!U?auth():V[tab]();
+ $('tabs').innerHTML=U?TB.map(x=>`<button class="tab ${x[0]===tab?'on':''}" data-a="go" data-v="${x[0]}"><span>${x[1]}</span>${t(x[0])}</button>`).join(''):'';
+ const m=$('msgs');if(m)m.scrollTop=m.scrollHeight}
+async function send(){
+ const i=$('txt'),v=i.value.trim();if(!v||!room)return;i.value='';
+ const body=v.toLowerCase().startsWith('/quiz')?'❓QUIZ|'+Math.floor(Math.random()*QS.length):v;
+ const r=await sb.from('messages').insert({room_id:room.id,username:P.username,body}).select().single();
+ if(r.error)toast(r.error.message);else addMsg(r.data)}
+async function load(tb){
+ if(tb==='ranks'){const r=await sb.from('profiles').select('username,points').order('points',{ascending:false}).limit(20);board=r.data||[]}
+ if(tb==='market'){const r=await sb.from('listings').select('*').order('created_at',{ascending:false}).limit(50);items=r.data||[]}
+ render()}
+document.addEventListener('click',async e=>{
+ const b=e.target.closest('[data-a]');if(!b)return;const d=b.dataset;
+ switch(d.a){
+  case'go':tab=d.v;render();if(d.v==='ranks'||d.v==='market')load(d.v);break;
+  case'open':openRoom(d.id);break;
+  case'back':if(ch){sb.removeChannel(ch);ch=null}room=null;render();break;
+  case'send':send();break;
+  case'mkroom':{const n=$('rn').value.trim();if(!n)break;const r=await sb.from('rooms').insert({name:n}).select().single();
+   if(r.error)toast(r.error.message);else{rooms.push(r.data);render()}break}
+  case'ans':{const q=QS[+d.i],good=(+d.j===q.a);S.done[d.id]=good;if(good){pts(10);toast('+10 ⭐')}save();paint();break}
+  case'join':S.joined=!S.joined;save();render();break;
+  case'sell':{const n=$('it').value.trim(),p=+$('pr').value;if(!n||!(p>0))break;
+   const r=await sb.from('listings').insert({seller:P.username,title:n,price:p});if(r.error)toast(r.error.message);else load('market');break}
+  case'del':await sb.from('listings').delete().eq('id',d.id);load('market');break;
+  case'lang':S.lang=d.v;save();render();break;
+  case'login':{const r=await sb.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});if(r.error)toast(r.error.message);break}
+  case'signup':{const u=$('un').value.trim();if(u.length<2){toast(t('user'));break}
+   const r=await sb.auth.signUp({email:$('em').value.trim(),password:$('pw').value,options:{data:{username:u}}});
+   if(r.error)toast(r.error.message);else if(!r.data.session)toast(t('check'));break}
+  case'logout':if(ch){sb.removeChannel(ch);ch=null}room=null;await sb.auth.signOut();break}
+});
+document.addEventListener('change',e=>{if(e.target.id==='lite'){S.lite=e.target.checked;save();render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='txt')send()});
+setInterval(()=>{
+ const p=ph();
+ if(lastF===1&&p.f===0&&S.joined&&U){pts(10);toast('⏱️ +10 ⭐');if(tab==='pods')render()}
+ lastF=p.f;const c=$('clk');if(c){c.textContent=fmt(p.left);$('phl').textContent=p.f?t('focus'):t('rest')}
+},1000);
+render();
+if(sb){sb.auth.onAuthStateChange((_e,s)=>{const n=s&&s.user;if((n&&n.id)!==(U&&U.id))setUser(n)});sb.auth.getSession().then(r=>{if(r.data.session&&!U)setUser(r.data.session.user)})}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+</script>
+</body>
+</html>
